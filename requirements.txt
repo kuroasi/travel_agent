@@ -1,0 +1,11 @@
+requests
+fastapi
+uvicorn
+pydantic
+python-dotenv
+langchain-deepseek
+langgraph
+langgraph-supervisor
+langchain-core
+langchain-community
+typing-extensions
