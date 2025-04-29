@@ -41,3 +41,9 @@ venv.bak/
 
 # Local configuration
 .DS_Store
+
+# MCP related
+.mcp/
+mcp-logs/
+node_modules/
+package-lock.json
