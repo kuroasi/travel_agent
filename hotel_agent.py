@@ -4,13 +4,7 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 async def create_hotel_agent(model):
     # 创建MCP客户端连接
     mcp_servers = {
-        "airbnb": {
-            "command": "npx",
-            "args": [
-                "-y",
-                "@openbnb/mcp-server-airbnb"
-                ]
-        }
+
     }
     
     async with MultiServerMCPClient(mcp_servers) as client:

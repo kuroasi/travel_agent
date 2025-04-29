@@ -1,7 +1,7 @@
 from langgraph.prebuilt import create_react_agent
 from langchain_mcp_adapters.client import MultiServerMCPClient
 
-async def create_hotel_agent(model):
+async def create_budget_agent(model):
     # 创建MCP客户端连接
     mcp_servers = {
 
