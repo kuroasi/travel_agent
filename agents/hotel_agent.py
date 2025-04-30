@@ -1,7 +1,6 @@
 from langgraph.prebuilt import create_react_agent
-from hotel_tools import search_hotels, search_room_types, book_hotel, get_booking_info
-
-from transfer_tool import *
+from tools.hotel_tools import search_hotels, search_room_types, book_hotel, get_booking_info
+from tools.transfer_tool import *
 
 async def create_hotel_agent(model):
     # 定义酒店工具
@@ -62,5 +61,5 @@ async def create_hotel_agent(model):
 确保提供准确的信息。""",
         name="hotel_agent"
     )
-    
+
     return agent

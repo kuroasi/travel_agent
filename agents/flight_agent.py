@@ -1,14 +1,13 @@
 from langgraph.prebuilt import create_react_agent
 from langchain_mcp_adapters.client import MultiServerMCPClient
-from flight_tools import search_flights, book_flight, get_booking_info
-
-from transfer_tool import *
+from tools.flight_tools import search_flights, book_flight, get_booking_info
+from tools.transfer_tool import *
 
 async def create_flight_agent(model):
     # 创建工具列表
     flight_tools = [search_flights, book_flight, get_booking_info]
     transfer_tools = [transfer_to_hotel_agent, transfer_to_budget_agent, transfer_to_travel_schedule_agent]
-    
+
     # 创建agent
     agent = create_react_agent(
         model=model,
@@ -45,5 +44,5 @@ async def create_flight_agent(model):
 """,
         name="flight_agent"
     )
-    
+
     return agent

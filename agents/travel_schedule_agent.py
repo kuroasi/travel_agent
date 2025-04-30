@@ -3,7 +3,7 @@ from langgraph.prebuilt import create_react_agent
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_community.tools.tavily_search import TavilySearchResults
 
-from transfer_tool import *
+from tools.transfer_tool import *
 
 async def create_travel_schedule_agent(model):
     # 创建MCP客户端连接
@@ -13,10 +13,10 @@ async def create_travel_schedule_agent(model):
                 "transport": "sse"
         }
     }
-    
+
     # 创建tavily搜索工具
     tavily_tool = TavilySearchResults(max_results=10)
-    
+
     async with MultiServerMCPClient(mcp_servers) as client:
         # 获取MCP工具
         mcp_tools = client.get_tools()
@@ -36,5 +36,5 @@ async def create_travel_schedule_agent(model):
             ,
             name="travel_schedule_agent"
         )
-        
+
         return agent

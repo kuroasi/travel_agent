@@ -8,10 +8,10 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.store.memory import InMemoryStore
 
 # 导入各个agent创建函数
-from travel_schedule_agent import create_travel_schedule_agent
-from flight_agent import create_flight_agent
-from hotel_agent import create_hotel_agent
-from budget_agent import create_budget_agent
+from agents.travel_schedule_agent import create_travel_schedule_agent
+from agents.flight_agent import create_flight_agent
+from agents.hotel_agent import create_hotel_agent
+from agents.budget_agent import create_budget_agent
 
 import pprint
 
@@ -38,14 +38,14 @@ async def main():
     flight_agent = await create_flight_agent(model)
     hotel_agent = await create_hotel_agent(model)
     budget_agent = await create_budget_agent(model)
-    
+
     members = [
         "travel_schedule_agent",
         "flight_agent",
         "hotel_agent",
         "budget_agent",
     ]
-    
+
     # 定义supervisor
     system_prompt = (
         "您是一个旅行规划代理，负责将用户的问题拆解成任务，并分配给以下工作人员："
@@ -59,54 +59,54 @@ async def main():
         "hotel_agent: help users to search hotel information and book hotel rooms."
         "budget_agent: help users to manage their travel budget."
     )
-    
+
     supervisor = create_supervisor(
         agents=[travel_schedule_agent, flight_agent, hotel_agent, budget_agent],
         model=model,
         prompt=system_prompt,
     )
-    
+
     # 编译图 - 使用checkpointer和store进行内存管理
     multi_agent_graph = supervisor.compile(
         checkpointer=checkpointer,
         store=store
     )
-    
+
     # 创建一个唯一的会话ID用于保持对话连续性
     session_id = str(uuid.uuid4())
-    
+
     # 启动交互式会话
     print("\n" + "="*50)
     print("🌍 旅行助手已启动! 输入您的旅行问题，或输入 'exit' 退出。")
     print(f"📝 会话ID: {session_id}")
     print("="*50 + "\n")
-    
+
     # 跟踪对话消息，便于显示
     conversation_messages = []
-    
+
     # 追踪对话状态
     is_first_message = True
-    
+
     while True:
         # 获取用户输入
         user_input = input("🧑‍💻 您: ")
-        
+
         # 检查是否退出
         if user_input.lower() in ['exit', 'quit', '退出', '结束']:
             print("\n感谢使用旅行助手，再见！👋")
             break
-        
+
         # 创建当前用户消息
         current_message = {"role": "user", "content": user_input}
-        
+
         # 添加到显示用的消息列表
         conversation_messages.append(current_message)
-        
+
         print("\n🤖 助手思考中...\n")
-        
+
         # 配置 - 使用一致的thread_id确保内存连续性
         config = {"configurable": {"thread_id": session_id}}
-        
+
         # 如果是首次消息，初始化新状态；否则使用现有状态
         if is_first_message:
             # 首次对话，初始化状态
@@ -115,12 +115,12 @@ async def main():
         else:
             # 继续现有对话，使用configurable.thread_id自动关联现有状态
             input_data = {"messages": [current_message]}
-        
+
         # 使用流式输出处理响应
         response_content = None
         async for stream_mode, chunk in multi_agent_graph.astream(
             input_data,
-            config, 
+            config,
             stream_mode=["updates","custom"]
             ):
             if stream_mode == "updates":
@@ -132,7 +132,7 @@ async def main():
             elif stream_mode == "custom":
                 print("\n===== 工具调用 =====")
                 pprint.pprint(chunk)
-        
+
         # 显示最终响应
         if response_content:
             # 添加到显示用的消息列表
@@ -140,12 +140,12 @@ async def main():
             print("\n" + "="*50)
             print("🤖 助手: " + response_content)
             print("="*50 + "\n")
-        
+
         # 限制显示的对话历史长度，避免终端过于混乱
         if len(conversation_messages) > 10:
             # 只保留最近的10条消息用于显示
             conversation_messages = conversation_messages[-10:]
-        
+
         # 注意：无需手动管理实际的对话状态，LangGraph的checkpointer已经自动处理
 
 if __name__ == "__main__":
