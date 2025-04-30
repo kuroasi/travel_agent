@@ -71,7 +71,7 @@ travel_agent/
 1. Clone the repository:
    ```bash
    git clone https://github.com/yourusername/travel_agent.git
-   cd travel_agentv2
+   cd travel_agent
    ```
 
 2. Create a virtual environment:

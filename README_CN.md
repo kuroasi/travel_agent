@@ -71,7 +71,7 @@ travel_agent/
 1. 克隆仓库：
    ```bash
    git clone https://github.com/yourusername/travel_agent.git
-   cd travel_agentv2
+   cd travel_agent
    ```
 
 2. 创建虚拟环境：
