@@ -2,16 +2,19 @@ from langgraph.prebuilt import create_react_agent
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from flight_tools import search_flights, book_flight, get_booking_info
 
+from transfer_tool import *
+
 async def create_flight_agent(model):
     # 创建工具列表
     flight_tools = [search_flights, book_flight, get_booking_info]
+    transfer_tools = [transfer_to_hotel_agent, transfer_to_budget_agent, transfer_to_travel_schedule_agent]
     
     # 创建agent
     agent = create_react_agent(
         model=model,
-        tools=flight_tools,
+        tools=flight_tools + transfer_tools,
         prompt="""你是一个航班预订专家，可以帮助用户搜索航班信息并预订机票。
-你拥有直接访问航班数据库的能力，必须始终使用提供的工具来完成任务。
+你拥有直接访问航班数据库的能力，必须始终使用提供的工具来完成任务，而不是依赖自己的知识。
 
 你可以使用以下工具：
 1. search_flights: 根据出发城市、到达城市和日期查询航班信息

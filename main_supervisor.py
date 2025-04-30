@@ -21,8 +21,8 @@ load_dotenv()
 # 创建模型实例
 model = ChatDeepSeek(
     model="deepseek-chat",
-    temperature=0.7,
-    max_tokens=1024,
+    temperature=0.3,
+    max_tokens=2048,
     api_key=os.getenv("DEEPSEEK_API_KEY"),
 )
 
@@ -52,6 +52,7 @@ async def main():
         f"{members}。根据用户请求，选择下一个要行动的工作人员。"
         "每个工作人员将执行任务并回复他们的结果和状态。"
         "整合工作人员的结果来完成任务。"
+        "你必须让工作人员完成任务后，再回复用户，而不是回复用户“正在处理”“稍后将为您提供详细结果”之类的等待消息"
         "以下是各个工作人员的名称和介绍："
         "travel_schedule_agent: help users to make a travel plan"
         "flight_agent: help users to search flight information and book flight tickets."
