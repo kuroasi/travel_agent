@@ -1,8 +1,8 @@
 """
-航班查询和预订工具
-定义两个主要工具：
-1. 查询航班信息
-2. 预订航班
+Flight Search and Booking Tools
+Defines two main tools:
+1. Search for flight information
+2. Book flights
 """
 
 from langchain_core.tools import tool
@@ -11,31 +11,31 @@ from data.flight_data import flights, add_booking, get_booking
 @tool
 def search_flights(departure_city: str, arrival_city: str, date: str = None) -> str:
     """
-    根据出发城市、到达城市和日期查询航班信息
+    Search for flight information based on departure city, arrival city, and date
 
     Args:
-        departure_city: 出发城市
-        arrival_city: 到达城市
-        date: 航班日期 (可选，格式为YYYY-MM-DD)
+        departure_city: Departure city
+        arrival_city: Arrival city
+        date: Flight date (optional, format is YYYY-MM-DD)
 
     Returns:
-        匹配的航班信息列表
+        List of matching flight information
     """
-    # 清理和标准化输入参数
+    # Clean and normalize input parameters
     departure_city = departure_city.strip()
     arrival_city = arrival_city.strip()
 
-    # 过滤航班
+    # Filter flights
     results = []
 
-    # 首先尝试精确匹配
+    # First try exact matching
     for flight in flights:
         if (flight["departure_city"] == departure_city and
             flight["arrival_city"] == arrival_city and
             (date is None or date == flight["date"])):
             results.append(flight)
 
-    # 如果精确匹配没有结果，尝试部分匹配
+    # If exact matching has no results, try partial matching
     if not results:
         for flight in flights:
             if (departure_city in flight["departure_city"] and
@@ -43,19 +43,19 @@ def search_flights(departure_city: str, arrival_city: str, date: str = None) -> 
                 (date is None or date == flight["date"])):
                 results.append(flight)
 
-    # 格式化输出
+    # Format output
     if not results:
-        return f"未找到从{departure_city}到{arrival_city}的航班。" + (f"日期：{date}" if date else "")
+        return f"No flights found from {departure_city} to {arrival_city}." + (f" Date: {date}" if date else "")
 
-    output = f"找到{len(results)}个从{departure_city}到{arrival_city}的航班" + (f"，日期：{date}" if date else "") + "\n\n"
+    output = f"Found {len(results)} flights from {departure_city} to {arrival_city}" + (f", date: {date}" if date else "") + "\n\n"
 
     for flight in results:
-        output += f"航班号: {flight['flight_id']} - {flight['airline']}\n"
-        output += f"日期: {flight['date']}\n"
-        output += f"路线: {flight['departure_city']}({flight['departure_airport']}) → {flight['arrival_city']}({flight['arrival_airport']})\n"
-        output += f"时间: {flight['departure_time']} - {flight['arrival_time']} (飞行时间: {flight['duration']})\n"
-        output += f"价格: ¥{flight['price']} ({flight['cabin_class']})\n"
-        output += f"剩余座位: {flight['available_seats']}\n"
+        output += f"Flight Number: {flight['flight_id']} - {flight['airline']}\n"
+        output += f"Date: {flight['date']}\n"
+        output += f"Route: {flight['departure_city']}({flight['departure_airport']}) → {flight['arrival_city']}({flight['arrival_airport']})\n"
+        output += f"Time: {flight['departure_time']} - {flight['arrival_time']} (Flight duration: {flight['duration']})\n"
+        output += f"Price: ¥{flight['price']} ({flight['cabin_class']})\n"
+        output += f"Available seats: {flight['available_seats']}\n"
         output += "----------\n"
 
     return output
@@ -68,18 +68,18 @@ def book_flight(
     contact_phone: str
 ) -> str:
     """
-    预订指定航班
+    Book a specified flight
 
     Args:
-        flight_id: 航班号码
-        passenger_name: 乘客姓名
-        passenger_id: 乘客身份证号
-        contact_phone: 联系电话
+        flight_id: Flight number
+        passenger_name: Passenger name
+        passenger_id: Passenger ID number
+        contact_phone: Contact phone number
 
     Returns:
-        预订结果信息，包括预订号
+        Booking result information, including booking number
     """
-    # 查找航班
+    # Find flight
     selected_flight = None
     for flight in flights:
         if flight["flight_id"] == flight_id:
@@ -87,13 +87,13 @@ def book_flight(
             break
 
     if not selected_flight:
-        return f"未找到航班号为 {flight_id} 的航班，请核对后重试。"
+        return f"Flight number {flight_id} not found, please check and try again."
 
-    # 检查座位
+    # Check seats
     if selected_flight["available_seats"] <= 0:
-        return f"抱歉，航班 {flight_id} 已无可用座位。"
+        return f"Sorry, flight {flight_id} has no available seats."
 
-    # 创建预订信息
+    # Create booking information
     booking_info = {
         "flight_id": flight_id,
         "airline": selected_flight["airline"],
@@ -111,55 +111,55 @@ def book_flight(
         "cabin_class": selected_flight["cabin_class"]
     }
 
-    # 添加预订
+    # Add booking
     booking_id = add_booking(booking_info)
 
-    # 更新航班座位数
+    # Update flight seats
     selected_flight["available_seats"] -= 1
 
-    # 返回预订确认信息
-    confirmation = f"✅ 预订成功！预订号: {booking_id}\n\n"
-    confirmation += f"航班信息:\n"
-    confirmation += f"- 航班号: {flight_id} ({selected_flight['airline']})\n"
-    confirmation += f"- 日期: {selected_flight['date']}\n"
-    confirmation += f"- 路线: {selected_flight['departure_city']} → {selected_flight['arrival_city']}\n"
-    confirmation += f"- 起飞/到达: {selected_flight['departure_time']} - {selected_flight['arrival_time']}\n\n"
-    confirmation += f"乘客信息:\n"
-    confirmation += f"- 姓名: {passenger_name}\n"
-    confirmation += f"- 证件号: {passenger_id}\n"
-    confirmation += f"- 联系电话: {contact_phone}\n\n"
-    confirmation += f"请在航班起飞前2小时到达机场办理登机手续。\n"
-    confirmation += f"退改签规则请咨询航空公司客服。"
+    # Return booking confirmation
+    confirmation = f"✅ Booking successful! Booking number: {booking_id}\n\n"
+    confirmation += f"Flight information:\n"
+    confirmation += f"- Flight number: {flight_id} ({selected_flight['airline']})\n"
+    confirmation += f"- Date: {selected_flight['date']}\n"
+    confirmation += f"- Route: {selected_flight['departure_city']} → {selected_flight['arrival_city']}\n"
+    confirmation += f"- Departure/Arrival: {selected_flight['departure_time']} - {selected_flight['arrival_time']}\n\n"
+    confirmation += f"Passenger information:\n"
+    confirmation += f"- Name: {passenger_name}\n"
+    confirmation += f"- ID number: {passenger_id}\n"
+    confirmation += f"- Contact phone: {contact_phone}\n\n"
+    confirmation += f"Please arrive at the airport 2 hours before the flight departure to check in.\n"
+    confirmation += f"For rebooking and refund policies, please contact the airline customer service."
 
     return confirmation
 
 @tool
 def get_booking_info(booking_id: str) -> str:
     """
-    根据预订号查询预订信息
+    Query booking information based on booking number
 
     Args:
-        booking_id: 预订号
+        booking_id: Booking number
 
     Returns:
-        预订详情
+        Booking details
     """
     booking = get_booking(booking_id)
 
     if not booking:
-        return f"未找到预订号为 {booking_id} 的预订记录。"
+        return f"No booking record found for booking number {booking_id}."
 
-    info = f"预订号: {booking_id} (状态: {booking['status']})\n\n"
-    info += f"航班信息:\n"
-    info += f"- 航班号: {booking['flight_id']} ({booking['airline']})\n"
-    info += f"- 日期: {booking['date']}\n"
-    info += f"- 路线: {booking['departure_city']} → {booking['arrival_city']}\n"
-    info += f"- 起飞/到达: {booking['departure_time']} - {booking['arrival_time']}\n"
-    info += f"- 机场: {booking['departure_airport']} → {booking['arrival_airport']}\n\n"
-    info += f"乘客信息:\n"
-    info += f"- 姓名: {booking['passenger_name']}\n"
-    info += f"- 证件号: {booking['passenger_id']}\n"
-    info += f"- 联系电话: {booking['contact_phone']}\n\n"
-    info += f"票价: ¥{booking['price']} ({booking['cabin_class']})"
+    info = f"Booking number: {booking_id} (Status: {booking['status']})\n\n"
+    info += f"Flight information:\n"
+    info += f"- Flight number: {booking['flight_id']} ({booking['airline']})\n"
+    info += f"- Date: {booking['date']}\n"
+    info += f"- Route: {booking['departure_city']} → {booking['arrival_city']}\n"
+    info += f"- Departure/Arrival: {booking['departure_time']} - {booking['arrival_time']}\n"
+    info += f"- Airports: {booking['departure_airport']} → {booking['arrival_airport']}\n\n"
+    info += f"Passenger information:\n"
+    info += f"- Name: {booking['passenger_name']}\n"
+    info += f"- ID number: {booking['passenger_id']}\n"
+    info += f"- Contact phone: {booking['contact_phone']}\n\n"
+    info += f"Fare: ¥{booking['price']} ({booking['cabin_class']})"
 
     return info

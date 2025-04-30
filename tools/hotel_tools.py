@@ -1,44 +1,44 @@
 """
-酒店查询和预订相关工具函数
+Hotel search and booking related tool functions
 """
 from datetime import datetime
 from data.hotel_data import HOTELS, ROOM_TYPES, book_hotel_room, get_booking
 
 def search_hotels(city=None, district=None, amenities=None, min_stars=None, max_price=None):
     """
-    查询酒店信息
+    Search for hotel information
 
-    参数:
-    - city: 城市
-    - district: 区域
-    - amenities: 设施列表
-    - min_stars: 最低星级
-    - max_price: 最高价格(从价格区间提取上限)
+    Parameters:
+    - city: City
+    - district: District
+    - amenities: List of facilities
+    - min_stars: Minimum star rating
+    - max_price: Maximum price (extracted from price range upper limit)
 
-    返回:
-    - 符合条件的酒店列表
+    Returns:
+    - List of hotels matching the criteria
     """
     results = []
 
     for hotel in HOTELS:
-        # 检查城市
+        # Check city
         if city and hotel["city"] != city:
             continue
 
-        # 检查区域
+        # Check district
         if district and hotel["district"] != district:
             continue
 
-        # 检查设施
+        # Check amenities
         if amenities:
             if not all(amenity in hotel["amenities"] for amenity in amenities):
                 continue
 
-        # 检查星级
+        # Check star rating
         if min_stars and hotel["stars"] < min_stars:
             continue
 
-        # 检查价格区间上限
+        # Check price range upper limit
         if max_price:
             price_range = hotel["price_range"].replace("¥", "").split("-")
             if len(price_range) > 1:
@@ -46,7 +46,7 @@ def search_hotels(city=None, district=None, amenities=None, min_stars=None, max_
                 if max_hotel_price > max_price:
                     continue
 
-        # 添加到结果
+        # Add to results
         results.append({
             "hotel_id": hotel["hotel_id"],
             "name": hotel["name"],
@@ -61,34 +61,34 @@ def search_hotels(city=None, district=None, amenities=None, min_stars=None, max_
         })
 
     if not results:
-        return "未找到符合条件的酒店。"
+        return "No hotels found matching your criteria."
 
-    # 格式化输出
-    formatted_results = "找到以下符合条件的酒店：\n\n"
+    # Format output
+    formatted_results = "Found the following hotels matching your criteria:\n\n"
     for i, hotel in enumerate(results, 1):
-        formatted_results += f"{i}. {hotel['name']} ({hotel['stars']}星级)\n"
-        formatted_results += f"   位置: {hotel['district']}, {hotel['address']}\n"
-        formatted_results += f"   设施: {', '.join(hotel['amenities'][:3])}...\n"
-        formatted_results += f"   价格区间: {hotel['price_range']}\n"
-        formatted_results += f"   评分: {hotel['rating']}\n"
-        formatted_results += f"   简介: {hotel['description']}\n"
-        formatted_results += f"   酒店ID: {hotel['hotel_id']}\n\n"
+        formatted_results += f"{i}. {hotel['name']} ({hotel['stars']} stars)\n"
+        formatted_results += f"   Location: {hotel['district']}, {hotel['address']}\n"
+        formatted_results += f"   Amenities: {', '.join(hotel['amenities'][:3])}...\n"
+        formatted_results += f"   Price range: {hotel['price_range']}\n"
+        formatted_results += f"   Rating: {hotel['rating']}\n"
+        formatted_results += f"   Description: {hotel['description']}\n"
+        formatted_results += f"   Hotel ID: {hotel['hotel_id']}\n\n"
 
     return formatted_results
 
 def search_room_types(hotel_id, check_in_date=None, guests=None):
     """
-    查询酒店可用房型
+    Query available room types for a hotel
 
-    参数:
-    - hotel_id: 酒店ID
-    - check_in_date: 入住日期 (可选)
-    - guests: 入住人数 (可选)
+    Parameters:
+    - hotel_id: Hotel ID
+    - check_in_date: Check-in date (optional)
+    - guests: Number of guests (optional)
 
-    返回:
-    - 符合条件的房型列表
+    Returns:
+    - List of room types matching the criteria
     """
-    # 验证酒店ID是否存在
+    # Verify if hotel ID exists
     hotel = None
     for h in HOTELS:
         if h["hotel_id"] == hotel_id:
@@ -96,64 +96,64 @@ def search_room_types(hotel_id, check_in_date=None, guests=None):
             break
 
     if not hotel:
-        return "未找到该酒店信息。"
+        return "Hotel information not found."
 
-    # 获取房型信息
+    # Get room type information
     room_types = ROOM_TYPES.get(hotel_id, [])
     if not room_types:
-        return f"未找到{hotel['name']}的房型信息。"
+        return f"No room type information found for {hotel['name']}."
 
     results = []
     for room in room_types:
-        # 检查是否有可用房间
+        # Check if rooms are available
         if room["available"] <= 0:
             continue
 
-        # 检查入住人数
+        # Check guest capacity
         if guests and room["max_guests"] < guests:
             continue
 
-        # 添加到结果
+        # Add to results
         results.append(room)
 
     if not results:
-        return f"{hotel['name']}在指定条件下没有可用房间。"
+        return f"{hotel['name']} has no available rooms under the specified conditions."
 
-    # 格式化输出
-    formatted_results = f"{hotel['name']}可用房型信息：\n\n"
+    # Format output
+    formatted_results = f"Available room types at {hotel['name']}:\n\n"
     for i, room in enumerate(results, 1):
         formatted_results += f"{i}. {room['name']}\n"
-        formatted_results += f"   房型ID: {room['type_id']}\n"
-        formatted_results += f"   床型: {room['bed_type']}\n"
-        formatted_results += f"   面积: {room['area']}\n"
-        formatted_results += f"   景观: {room['view']}\n"
-        formatted_results += f"   最多入住: {room['max_guests']}人\n"
-        formatted_results += f"   早餐: {'含早' if room['breakfast'] else '不含早'}\n"
-        formatted_results += f"   取消政策: {room['cancellation']}\n"
-        formatted_results += f"   设施: {', '.join(room['amenities'])}\n"
-        formatted_results += f"   价格: ¥{room['price']}/晚\n"
-        formatted_results += f"   剩余房间数: {room['available']}\n\n"
+        formatted_results += f"   Room type ID: {room['type_id']}\n"
+        formatted_results += f"   Bed type: {room['bed_type']}\n"
+        formatted_results += f"   Area: {room['area']}\n"
+        formatted_results += f"   View: {room['view']}\n"
+        formatted_results += f"   Maximum occupancy: {room['max_guests']} persons\n"
+        formatted_results += f"   Breakfast: {'Included' if room['breakfast'] else 'Not included'}\n"
+        formatted_results += f"   Cancellation policy: {room['cancellation']}\n"
+        formatted_results += f"   Amenities: {', '.join(room['amenities'])}\n"
+        formatted_results += f"   Price: ¥{room['price']}/night\n"
+        formatted_results += f"   Rooms available: {room['available']}\n\n"
 
     return formatted_results
 
 def book_hotel(hotel_id, room_type_id, guest_name, id_number, phone,
                check_in_date, check_out_date):
     """
-    预订酒店
+    Book a hotel room
 
-    参数:
-    - hotel_id: 酒店ID
-    - room_type_id: 房型ID
-    - guest_name: 客人姓名
-    - id_number: 身份证号
-    - phone: 联系电话
-    - check_in_date: 入住日期
-    - check_out_date: 退房日期
+    Parameters:
+    - hotel_id: Hotel ID
+    - room_type_id: Room type ID
+    - guest_name: Guest name
+    - id_number: ID card number
+    - phone: Contact phone
+    - check_in_date: Check-in date
+    - check_out_date: Check-out date
 
-    返回:
-    - 预订成功信息和预订号，或预订失败原因
+    Returns:
+    - Booking success information and booking ID, or reason for booking failure
     """
-    # 验证酒店ID是否存在
+    # Verify if hotel ID exists
     hotel = None
     for h in HOTELS:
         if h["hotel_id"] == hotel_id:
@@ -161,9 +161,9 @@ def book_hotel(hotel_id, room_type_id, guest_name, id_number, phone,
             break
 
     if not hotel:
-        return "预订失败：未找到该酒店信息。"
+        return "Booking failed: Hotel information not found."
 
-    # 验证房型ID是否存在
+    # Verify if room type ID exists
     room_type = None
     if hotel_id in ROOM_TYPES:
         for rt in ROOM_TYPES[hotel_id]:
@@ -172,20 +172,20 @@ def book_hotel(hotel_id, room_type_id, guest_name, id_number, phone,
                 break
 
     if not room_type:
-        return "预订失败：未找到该房型信息。"
+        return "Booking failed: Room type information not found."
 
-    # 检查是否有可用房间
+    # Check if rooms are available
     if room_type["available"] <= 0:
-        return "预订失败：该房型已售罄。"
+        return "Booking failed: This room type is sold out."
 
-    # 检查入住日期和退房日期格式
+    # Check check-in and check-out date format
     try:
         datetime.strptime(check_in_date, "%Y-%m-%d")
         datetime.strptime(check_out_date, "%Y-%m-%d")
     except ValueError:
-        return "预订失败：日期格式不正确，请使用YYYY-MM-DD格式。"
+        return "Booking failed: Incorrect date format, please use YYYY-MM-DD format."
 
-    # 创建预订
+    # Create booking
     booking_id = book_hotel_room(
         hotel_id,
         room_type_id,
@@ -197,53 +197,53 @@ def book_hotel(hotel_id, room_type_id, guest_name, id_number, phone,
     )
 
     if not booking_id:
-        return "预订失败：系统错误，请稍后重试。"
-
-    # 获取预订详情
+        return "Booking failed: System error, please try again later."
+        
+    # Get booking details
     booking = get_booking(booking_id)
-
-    # 格式化预订成功信息
-    result = "预订成功！以下是您的预订信息：\n\n"
-    result += f"预订号: {booking['booking_id']}\n"
-    result += f"酒店名称: {booking['hotel_name']}\n"
-    result += f"房型: {booking['room_type_name']}\n"
-    result += f"入住人: {booking['guest_name']}\n"
-    result += f"联系电话: {booking['phone']}\n"
-    result += f"入住日期: {booking['check_in_date']}\n"
-    result += f"退房日期: {booking['check_out_date']}\n"
-    result += f"房费: ¥{booking['price']}/晚\n"
-    result += f"预订状态: {booking['status']}\n"
-    result += f"预订时间: {booking['booking_time']}\n\n"
-    result += "感谢您选择我们的服务，祝您旅途愉快！"
-
+    
+    # Format booking success information
+    result = "Booking successful! Here is your booking information:\n\n"
+    result += f"Booking ID: {booking['booking_id']}\n"
+    result += f"Hotel: {booking['hotel_name']}\n"
+    result += f"Room type: {booking['room_type_name']}\n"
+    result += f"Guest name: {booking['guest_name']}\n"
+    result += f"Contact phone: {booking['phone']}\n"
+    result += f"Check-in date: {booking['check_in_date']}\n"
+    result += f"Check-out date: {booking['check_out_date']}\n"
+    result += f"Room rate: ¥{booking['price']}/night\n"
+    result += f"Booking status: {booking['status']}\n"
+    result += f"Booking time: {booking['booking_time']}\n\n"
+    result += "Thank you for choosing our service. We wish you a pleasant stay!"
+    
     return result
 
 def get_booking_info(booking_id):
     """
-    获取预订信息
+    Get booking information
 
-    参数:
-    - booking_id: 预订号
+    Parameters:
+    - booking_id: Booking ID
 
-    返回:
-    - 预订详情或错误信息
+    Returns:
+    - Booking details or error message
     """
     booking = get_booking(booking_id)
-
+    
     if not booking:
-        return "未找到该预订记录。"
-
-    # 格式化预订信息
-    result = "预订详情：\n\n"
-    result += f"预订号: {booking['booking_id']}\n"
-    result += f"酒店名称: {booking['hotel_name']}\n"
-    result += f"房型: {booking['room_type_name']}\n"
-    result += f"入住人: {booking['guest_name']}\n"
-    result += f"联系电话: {booking['phone']}\n"
-    result += f"入住日期: {booking['check_in_date']}\n"
-    result += f"退房日期: {booking['check_out_date']}\n"
-    result += f"房费: ¥{booking['price']}/晚\n"
-    result += f"预订状态: {booking['status']}\n"
-    result += f"预订时间: {booking['booking_time']}\n"
-
+        return "No booking record found."
+    
+    # Format booking information
+    result = "Booking details:\n\n"
+    result += f"Booking ID: {booking['booking_id']}\n"
+    result += f"Hotel: {booking['hotel_name']}\n"
+    result += f"Room type: {booking['room_type_name']}\n"
+    result += f"Guest name: {booking['guest_name']}\n"
+    result += f"Contact phone: {booking['phone']}\n"
+    result += f"Check-in date: {booking['check_in_date']}\n"
+    result += f"Check-out date: {booking['check_out_date']}\n"
+    result += f"Room rate: ¥{booking['price']}/night\n"
+    result += f"Booking status: {booking['status']}\n"
+    result += f"Booking time: {booking['booking_time']}\n"
+    
     return result

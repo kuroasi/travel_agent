@@ -7,7 +7,7 @@ from langgraph_supervisor import create_supervisor
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.store.memory import InMemoryStore
 
-# 导入各个agent创建函数
+# Import agent creation functions
 from agents.travel_schedule_agent import create_travel_schedule_agent
 from agents.flight_agent import create_flight_agent
 from agents.hotel_agent import create_hotel_agent
@@ -15,10 +15,10 @@ from agents.budget_agent import create_budget_agent
 
 import pprint
 
-# 加载环境变量
+# Load environment variables
 load_dotenv()
 
-# 创建模型实例
+# Create model instance
 model = ChatDeepSeek(
     model="deepseek-chat",
     temperature=0.3,
@@ -26,14 +26,14 @@ model = ChatDeepSeek(
     api_key=os.getenv("DEEPSEEK_API_KEY"),
 )
 
-# 内存管理 - 使用InMemorySaver和InMemoryStore进行短期和长期记忆管理
+# Memory management - Using InMemorySaver and InMemoryStore for short-term and long-term memory management
 checkpointer = InMemorySaver()
 store = InMemoryStore()
 
-# 创建并运行多agent系统
+# Create and run multi-agent system
 async def main():
-    # 创建各个agent
-    print("正在初始化Travel Agent系统...")
+    # Create agents
+    print("Initializing Travel Agent system...")
     travel_schedule_agent = await create_travel_schedule_agent(model)
     flight_agent = await create_flight_agent(model)
     hotel_agent = await create_hotel_agent(model)
@@ -46,18 +46,18 @@ async def main():
         "budget_agent",
     ]
 
-    # 定义supervisor
+    # Define supervisor
     system_prompt = (
-        "您是一个旅行规划代理，负责将用户的问题拆解成任务，并分配给以下工作人员："
-        f"{members}。根据用户请求，选择下一个要行动的工作人员。"
-        "每个工作人员将执行任务并回复他们的结果和状态。"
-        "整合工作人员的结果来完成任务。"
-        "你必须让工作人员完成任务后，再回复用户，而不是回复用户“正在处理”“稍后将为您提供详细结果”之类的等待消息"
-        "以下是各个工作人员的名称和介绍："
-        "travel_schedule_agent: help users to make a travel plan"
-        "flight_agent: help users to search flight information and book flight tickets."
-        "hotel_agent: help users to search hotel information and book hotel rooms."
-        "budget_agent: help users to manage their travel budget."
+        "You are a travel planning agent responsible for breaking down user questions into tasks and assigning them to the following staff members:"
+        f"{members}. Choose the next staff member to act based on the user's request."
+        "Each staff member will complete their task and reply with their results and status."
+        "Integrate staff results to complete the task."
+        "You must let staff members complete their tasks before responding to the user, instead of telling the user 'processing' or 'will provide detailed results later' type of waiting messages."
+        "Here are the names and descriptions of each staff member:"
+        "travel_schedule_agent: helps users to make a travel plan"
+        "flight_agent: helps users to search flight information and book flight tickets."
+        "hotel_agent: helps users to search hotel information and book hotel rooms."
+        "budget_agent: helps users to manage their travel budget."
     )
 
     supervisor = create_supervisor(
@@ -72,51 +72,51 @@ async def main():
         store=store
     )
 
-    # 创建一个唯一的会话ID用于保持对话连续性
+    # Create a unique session ID for conversation continuity
     session_id = str(uuid.uuid4())
 
-    # 启动交互式会话
+    # Start interactive session
     print("\n" + "="*50)
-    print("🌍 旅行助手已启动! 输入您的旅行问题，或输入 'exit' 退出。")
-    print(f"📝 会话ID: {session_id}")
+    print("🌍 Travel Assistant is ready! Enter your travel question, or type 'exit' to quit.")
+    print(f"📝 Session ID: {session_id}")
     print("="*50 + "\n")
 
-    # 跟踪对话消息，便于显示
+    # Track conversation messages for display
     conversation_messages = []
 
-    # 追踪对话状态
+    # Track conversation state
     is_first_message = True
 
     while True:
-        # 获取用户输入
-        user_input = input("🧑‍💻 您: ")
+        # Get user input
+        user_input = input("🧑‍💻 You: ")
 
-        # 检查是否退出
+        # Check if exit
         if user_input.lower() in ['exit', 'quit', '退出', '结束']:
-            print("\n感谢使用旅行助手，再见！👋")
+            print("\nThank you for using Travel Assistant, goodbye! 👋")
             break
 
-        # 创建当前用户消息
+        # Create current user message
         current_message = {"role": "user", "content": user_input}
 
-        # 添加到显示用的消息列表
+        # Add to display message list
         conversation_messages.append(current_message)
 
-        print("\n🤖 助手思考中...\n")
+        print("\n🤖 Assistant thinking...\n")
 
-        # 配置 - 使用一致的thread_id确保内存连续性
+        # Configure - Use consistent thread_id to ensure memory continuity
         config = {"configurable": {"thread_id": session_id}}
 
-        # 如果是首次消息，初始化新状态；否则使用现有状态
+        # If first message, initialize new state; otherwise use existing state
         if is_first_message:
-            # 首次对话，初始化状态
+            # First conversation, initialize state
             input_data = {"messages": [current_message]}
             is_first_message = False
         else:
-            # 继续现有对话，使用configurable.thread_id自动关联现有状态
+            # Continue existing conversation, automatically associate with existing state using configurable.thread_id
             input_data = {"messages": [current_message]}
 
-        # 使用流式输出处理响应
+        # Use streaming output to process response
         response_content = None
         async for stream_mode, chunk in multi_agent_graph.astream(
             input_data,
@@ -124,32 +124,32 @@ async def main():
             stream_mode=["updates","custom"]
             ):
             if stream_mode == "updates":
-                print("\n===== 执行步骤 =====")
+                print("\n===== Execution Steps =====")
                 pprint.pprint(chunk)
-                # 如果是AI消息，保存以便显示
+                # If AI message, save for display
                 if hasattr(chunk, 'messages') and chunk.messages and chunk.messages[-1].role == 'assistant':
                     response_content = chunk.messages[-1].content
             elif stream_mode == "custom":
-                print("\n===== 工具调用 =====")
+                print("\n===== Tool Calls =====")
                 pprint.pprint(chunk)
 
-        # 显示最终响应
+        # Display final response
         if response_content:
-            # 添加到显示用的消息列表
+            # Add to display message list
             conversation_messages.append({"role": "assistant", "content": response_content})
             print("\n" + "="*50)
-            print("🤖 助手: " + response_content)
+            print("🤖 Assistant: " + response_content)
             print("="*50 + "\n")
 
-        # 限制显示的对话历史长度，避免终端过于混乱
+        # Limit displayed conversation history length to avoid terminal clutter
         if len(conversation_messages) > 10:
-            # 只保留最近的10条消息用于显示
+            # Only keep the most recent 10 messages for display
             conversation_messages = conversation_messages[-10:]
 
-        # 注意：无需手动管理实际的对话状态，LangGraph的checkpointer已经自动处理
+        # Note: No need to manually manage actual conversation state, LangGraph's checkpointer handles it automatically
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\n\n程序被用户中断。感谢使用旅行助手，再见！👋")
+        print("\n\nProgram interrupted by user. Thank you for using Travel Assistant, goodbye! 👋")

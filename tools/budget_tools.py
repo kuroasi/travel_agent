@@ -1,78 +1,78 @@
 """
-旅行预算管理相关工具函数
+Travel budget management related tool functions
 """
 from datetime import datetime
 import uuid
 
-# 保存用户预算和支出的数据结构
+# Data structures for storing user budgets and expenses
 TRAVEL_BUDGETS = {}
 EXPENSES = {}
 
-def estimate_travel_budget(destination, days, traveler_count, travel_style="标准"):
+def estimate_travel_budget(destination, days, traveler_count, travel_style="standard"):
     """
-    估算旅行总预算
+    Estimate travel total budget
     
-    参数:
-    - destination: 目的地，如"上海"、"东京"
-    - days: 旅行天数
-    - traveler_count: 旅行人数
-    - travel_style: 旅行风格，可选"经济"、"标准"、"豪华"
+    Parameters:
+    - destination: Destination, such as "Shanghai", "Tokyo"
+    - days: Number of travel days
+    - traveler_count: Number of travelers
+    - travel_style: Travel style, options include "economy", "standard", "luxury"
     
-    返回:
-    - 预算估算结果，包括总预算和各项明细
+    Returns:
+    - Budget estimation result, including total budget and detailed breakdown
     """
-    # 不同旅行风格的基础花费(每人每天)
+    # Base costs for different travel styles (per person per day)
     base_costs = {
-        "经济": {"住宿": 300, "餐饮": 150, "交通": 100, "景点": 100, "购物": 200, "其他": 50},
-        "标准": {"住宿": 600, "餐饮": 300, "交通": 150, "景点": 150, "购物": 500, "其他": 100},
-        "豪华": {"住宿": 1500, "餐饮": 600, "交通": 300, "景点": 300, "购物": 1000, "其他": 300}
+        "economy": {"accommodation": 300, "dining": 150, "transportation": 100, "attractions": 100, "shopping": 200, "other": 50},
+        "standard": {"accommodation": 600, "dining": 300, "transportation": 150, "attractions": 150, "shopping": 500, "other": 100},
+        "luxury": {"accommodation": 1500, "dining": 600, "transportation": 300, "attractions": 300, "shopping": 1000, "other": 300}
     }
     
-    # 特定城市的调整系数
+    # Adjustment factors for specific cities
     city_factors = {
-        "上海": 1.2, "北京": 1.1, "广州": 1.0, "深圳": 1.1, "杭州": 1.0,
-        "东京": 1.5, "大阪": 1.3, "京都": 1.3, "首尔": 1.2, "曼谷": 0.8,
-        "新加坡": 1.4, "香港": 1.5, "纽约": 1.8, "巴黎": 1.6, "伦敦": 1.7,
-        "罗马": 1.5, "悉尼": 1.5, "迪拜": 1.6, "马尔代夫": 2.0
+        "Shanghai": 1.2, "Beijing": 1.1, "Guangzhou": 1.0, "Shenzhen": 1.1, "Hangzhou": 1.0,
+        "Tokyo": 1.5, "Osaka": 1.3, "Kyoto": 1.3, "Seoul": 1.2, "Bangkok": 0.8,
+        "Singapore": 1.4, "Hong Kong": 1.5, "New York": 1.8, "Paris": 1.6, "London": 1.7,
+        "Rome": 1.5, "Sydney": 1.5, "Dubai": 1.6, "Maldives": 2.0
     }
     
-    # 获取城市系数，如果不在列表中则默认为1.0
+    # Get city factor, default to 1.0 if not in the list
     city_factor = city_factors.get(destination, 1.0)
     
-    # 获取基础花费
-    base = base_costs.get(travel_style, base_costs["标准"])
+    # Get base costs
+    base = base_costs.get(travel_style, base_costs["standard"])
     
-    # 计算各项预算
+    # Calculate budget for each category
     budget_items = {}
     total_budget = 0
     
     for category, daily_cost in base.items():
-        # 应用城市系数和人数、天数
+        # Apply city factor, number of travelers, and days
         category_cost = daily_cost * city_factor * traveler_count * days
         budget_items[category] = round(category_cost)
         total_budget += category_cost
     
-    # 往返机票估算(每人)
+    # Estimate round-trip flight costs (per person)
     flight_costs = {
-        "国内": {"经济": 1500, "标准": 2500, "豪华": 5000},
-        "亚洲": {"经济": 3000, "标准": 5000, "豪华": 12000},
-        "欧美": {"经济": 6000, "标准": 10000, "豪华": 25000}
+        "domestic": {"economy": 1500, "standard": 2500, "luxury": 5000},
+        "asia": {"economy": 3000, "standard": 5000, "luxury": 12000},
+        "intercontinental": {"economy": 6000, "standard": 10000, "luxury": 25000}
     }
     
-    # 根据目的地判断大致区域
-    if destination in ["上海", "北京", "广州", "深圳", "杭州"]:
-        region = "国内"
-    elif destination in ["东京", "大阪", "京都", "首尔", "曼谷", "新加坡", "香港"]:
-        region = "亚洲"
+    # Determine region based on destination
+    if destination in ["Shanghai", "Beijing", "Guangzhou", "Shenzhen", "Hangzhou"]:
+        region = "domestic"
+    elif destination in ["Tokyo", "Osaka", "Kyoto", "Seoul", "Bangkok", "Singapore", "Hong Kong"]:
+        region = "asia"
     else:
-        region = "欧美"
+        region = "intercontinental"
     
-    # 添加机票预算
+    # Add flight budget
     flight_budget = flight_costs[region][travel_style] * traveler_count
-    budget_items["机票"] = flight_budget
+    budget_items["flights"] = flight_budget
     total_budget += flight_budget
     
-    # 生成预算ID并保存预算信息
+    # Generate budget ID and save budget information
     budget_id = f"B{uuid.uuid4().hex[:8].upper()}"
     
     TRAVEL_BUDGETS[budget_id] = {
@@ -86,51 +86,51 @@ def estimate_travel_budget(destination, days, traveler_count, travel_style="标�
         "created_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
     
-    # 格式化输出
-    result = f"旅行预算估算 (ID: {budget_id}):\n\n"
-    result += f"目的地: {destination}\n"
-    result += f"旅行天数: {days}天\n"
-    result += f"旅行人数: {traveler_count}人\n"
-    result += f"旅行风格: {travel_style}\n\n"
+    # Format output
+    result = f"Travel Budget Estimate (ID: {budget_id}):\n\n"
+    result += f"Destination: {destination}\n"
+    result += f"Travel Duration: {days} days\n"
+    result += f"Number of Travelers: {traveler_count}\n"
+    result += f"Travel Style: {travel_style}\n\n"
     
-    result += "预算明细:\n"
+    result += "Budget Breakdown:\n"
     for category, amount in budget_items.items():
         result += f"- {category}: ¥{amount:,}\n"
     
-    result += f"\n总预算: ¥{round(total_budget):,}\n"
-    result += f"人均预算: ¥{round(total_budget/traveler_count):,}\n"
-    result += f"人均每日预算: ¥{round(total_budget/traveler_count/days):,}\n"
+    result += f"\nTotal Budget: ¥{round(total_budget):,}\n"
+    result += f"Budget per Person: ¥{round(total_budget/traveler_count):,}\n"
+    result += f"Budget per Person per Day: ¥{round(total_budget/traveler_count/days):,}\n"
     
     return result
 
 def track_expense(budget_id, category, amount, description=None):
     """
-    记录旅行支出
+    Record travel expense
     
-    参数:
-    - budget_id: 预算ID
-    - category: 支出类别，如"住宿"、"餐饮"、"交通"等
-    - amount: 支出金额
-    - description: 支出描述(可选)
+    Parameters:
+    - budget_id: Budget ID
+    - category: Expense category, such as "accommodation", "dining", "transportation", etc.
+    - amount: Expense amount
+    - description: Expense description (optional)
     
-    返回:
-    - 支出记录确认和剩余预算信息
+    Returns:
+    - Expense record confirmation and remaining budget information
     """
-    # 检查预算ID是否存在
+    # Check if budget ID exists
     if budget_id not in TRAVEL_BUDGETS:
-        return "无法找到该预算ID，请确认后重试。"
+        return "Cannot find this budget ID, please verify and try again."
     
     budget = TRAVEL_BUDGETS[budget_id]
     
-    # 检查类别是否有效
+    # Check if category is valid
     valid_categories = list(budget["budget_items"].keys())
     if category not in valid_categories:
-        return f"无效的支出类别。请使用以下类别之一: {', '.join(valid_categories)}"
+        return f"Invalid expense category. Please use one of the following: {', '.join(valid_categories)}"
     
-    # 生成支出ID
+    # Generate expense ID
     expense_id = f"E{uuid.uuid4().hex[:8].upper()}"
     
-    # 记录支出
+    # Record expense
     if budget_id not in EXPENSES:
         EXPENSES[budget_id] = []
     
@@ -142,239 +142,285 @@ def track_expense(budget_id, category, amount, description=None):
         "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
     
-    # 计算该类别已用预算和剩余预算
+    # Calculate category spent and remaining budget
     category_budget = budget["budget_items"][category]
     category_spent = sum(e["amount"] for e in EXPENSES[budget_id] if e["category"] == category)
     category_remaining = category_budget - category_spent
     
-    # 计算总体已用预算和剩余预算
+    # Calculate total spent and remaining budget
     total_budget = budget["total_budget"]
     total_spent = sum(e["amount"] for e in EXPENSES[budget_id])
     total_remaining = total_budget - total_spent
     
-    # 格式化输出
-    result = "支出已记录!\n\n"
-    result += f"支出ID: {expense_id}\n"
-    result += f"类别: {category}\n"
-    result += f"金额: ¥{amount:,}\n"
+    # Format output
+    result = "Expense recorded!\n\n"
+    result += f"Expense ID: {expense_id}\n"
+    result += f"Category: {category}\n"
+    result += f"Amount: ¥{amount:,}\n"
     
     if description:
-        result += f"描述: {description}\n"
+        result += f"Description: {description}\n"
     
-    result += f"\n{category}类别预算: ¥{category_budget:,}\n"
-    result += f"{category}类别已花费: ¥{category_spent:,}\n"
-    result += f"{category}类别剩余: ¥{category_remaining:,} "
+    result += f"\n{category} Category Budget: ¥{category_budget:,}\n"
+    result += f"{category} Category Spent: ¥{category_spent:,}\n"
+    result += f"{category} Category Remaining: ¥{category_remaining:,} "
     
-    # 添加预算使用百分比
+    # Add budget usage percentage
     category_percent = (category_spent / category_budget) * 100
-    result += f"({category_percent:.1f}%已使用)\n\n"
+    result += f"({category_percent:.1f}% used)\n\n"
     
-    result += f"总预算: ¥{total_budget:,}\n"
-    result += f"总支出: ¥{total_spent:,}\n"
-    result += f"剩余预算: ¥{total_remaining:,} "
+    result += f"Total Budget: ¥{total_budget:,}\n"
+    result += f"Total Spent: ¥{total_spent:,}\n"
+    result += f"Remaining Budget: ¥{total_remaining:,} "
     
-    # 添加总预算使用百分比
+    # Add total budget usage percentage
     total_percent = (total_spent / total_budget) * 100
-    result += f"({total_percent:.1f}%已使用)"
+    result += f"({total_percent:.1f}% used)"
     
     return result
 
 def analyze_budget(budget_id):
     """
-    分析预算使用情况
+    Analyze budget usage
     
-    参数:
-    - budget_id: 预算ID
+    Parameters:
+    - budget_id: Budget ID
     
-    返回:
-    - 预算使用分析报告
+    Returns:
+    - Budget usage analysis report
     """
-    # 检查预算ID是否存在
+    # Check if budget ID exists
     if budget_id not in TRAVEL_BUDGETS:
-        return "无法找到该预算ID，请确认后重试。"
+        return "Cannot find this budget ID, please verify and try again."
     
     budget = TRAVEL_BUDGETS[budget_id]
     
-    # 检查是否有支出记录
+    # Check if there are expense records
     if budget_id not in EXPENSES or not EXPENSES[budget_id]:
-        return f"尚未记录任何支出。预算总额: ¥{budget['total_budget']:,}"
+        return f"No expenses recorded yet. Total budget: ¥{budget['total_budget']:,}"
     
-    # 计算各类别的支出和剩余
-    categories = {}
-    total_spent = 0
+    # Calculate total spent
+    total_spent = sum(e["amount"] for e in EXPENSES[budget_id])
+    remaining_budget = budget["total_budget"] - total_spent
     
+    # Calculate percentage used
+    percent_used = (total_spent / budget["total_budget"]) * 100
+    
+    # Calculate category breakdown
+    category_data = {}
     for category, budget_amount in budget["budget_items"].items():
-        spent = sum(e["amount"] for e in EXPENSES[budget_id] if e["category"] == category)
-        remaining = budget_amount - spent
-        percent_used = (spent / budget_amount) * 100 if budget_amount > 0 else 0
+        category_spent = sum(e["amount"] for e in EXPENSES[budget_id] if e["category"] == category)
+        category_remaining = budget_amount - category_spent
         
-        categories[category] = {
+        if budget_amount > 0:
+            category_percent = (category_spent / budget_amount) * 100
+        else:
+            category_percent = 0
+        
+        category_data[category] = {
             "budget": budget_amount,
-            "spent": spent,
-            "remaining": remaining,
-            "percent_used": percent_used
+            "spent": category_spent,
+            "remaining": category_remaining,
+            "percent": category_percent
         }
-        
-        total_spent += spent
     
-    total_budget = budget["total_budget"]
-    total_remaining = total_budget - total_spent
-    total_percent_used = (total_spent / total_budget) * 100
+    # Sort categories by percentage used
+    sorted_categories = sorted(category_data.items(), key=lambda x: x[1]["percent"], reverse=True)
     
-    # 格式化输出
-    result = f"预算分析报告 (ID: {budget_id}):\n\n"
-    result += f"目的地: {budget['destination']}\n"
-    result += f"旅行天数: {budget['days']}天\n"
-    result += f"旅行人数: {budget['traveler_count']}人\n"
-    result += f"旅行风格: {budget['travel_style']}\n\n"
+    # Format output
+    result = f"Budget Analysis (ID: {budget_id}):\n\n"
+    result += f"Destination: {budget['destination']}\n"
+    result += f"Travel Duration: {budget['days']} days\n"
+    result += f"Number of Travelers: {budget['traveler_count']}\n"
+    result += f"Travel Style: {budget['travel_style']}\n\n"
     
-    # 添加总体预算情况
-    result += "总体预算情况:\n"
-    result += f"总预算: ¥{total_budget:,}\n"
-    result += f"已花费: ¥{total_spent:,} ({total_percent_used:.1f}%)\n"
-    result += f"剩余预算: ¥{total_remaining:,} ({100-total_percent_used:.1f}%)\n\n"
+    result += f"Total Budget: ¥{budget['total_budget']:,}\n"
+    result += f"Total Spent: ¥{total_spent:,} ({percent_used:.1f}% of total budget)\n"
+    result += f"Remaining Budget: ¥{remaining_budget:,}\n\n"
     
-    # 添加各类别预算使用情况
-    result += "各类别预算使用情况:\n"
-    
-    # 按使用百分比排序
-    sorted_categories = sorted(categories.items(), key=lambda x: x[1]["percent_used"], reverse=True)
-    
+    result += "Category Breakdown:\n"
     for category, data in sorted_categories:
         result += f"- {category}:\n"
-        result += f"  预算: ¥{data['budget']:,}\n"
-        result += f"  已花费: ¥{data['spent']:,} ({data['percent_used']:.1f}%)\n"
-        result += f"  剩余: ¥{data['remaining']:,}\n"
+        result += f"  Budget: ¥{data['budget']:,}\n"
+        result += f"  Spent: ¥{data['spent']:,} ({data['percent']:.1f}%)\n"
+        result += f"  Remaining: ¥{data['remaining']:,}\n"
     
-    # 添加预算建议
-    result += "\n预算建议:\n"
-    
-    # 超支类别
-    over_budget = [c for c, d in categories.items() if d["percent_used"] > 100]
-    if over_budget:
-        result += f"- 以下类别已超出预算: {', '.join(over_budget)}\n"
-    
-    # 接近超支类别
-    near_limit = [c for c, d in categories.items() if 80 <= d["percent_used"] <= 100]
-    if near_limit:
-        result += f"- 以下类别接近预算上限: {', '.join(near_limit)}\n"
-    
-    # 充足预算类别
-    good_categories = [c for c, d in categories.items() if d["percent_used"] < 50]
-    if good_categories:
-        result += f"- 以下类别预算充足: {', '.join(good_categories)}\n"
-    
-    # 总体预算状况评估
-    if total_percent_used > 90:
-        result += "- 总体预算即将用尽，建议控制后续支出\n"
-    elif total_percent_used > 70:
-        result += "- 总体预算使用较多，建议适当控制后续支出\n"
-    else:
-        result += "- 总体预算状况良好，可以继续按计划使用\n"
+    # Add expense list
+    result += "\nExpense History:\n"
+    sorted_expenses = sorted(EXPENSES[budget_id], key=lambda x: x["time"], reverse=True)
+    for expense in sorted_expenses:
+        result += f"- {expense['time']}: {expense['category']} - ¥{expense['amount']:,}"
+        if expense["description"]:
+            result += f" ({expense['description']})"
+        result += "\n"
     
     return result
 
 def compare_options(option_type, options):
     """
-    比较不同选项的成本和价值
+    Compare the cost and value of different options
     
-    参数:
-    - option_type: 选项类型，如"酒店"、"交通"等
-    - options: 选项列表，格式为[{"name": "选项1", "cost": 1000, "features": ["特点1", "特点2"]}, ...]
+    Parameters:
+    - option_type: Type of option, such as "hotel", "transportation", etc.
+    - options: List of options, format is [{"name":"Option1","cost":1000,"features":["Feature1","Feature2"]},...]
     
-    返回:
-    - 选项比较分析
+    Returns:
+    - Comparison analysis result
     """
     if not options or len(options) < 2:
-        return "请提供至少两个选项进行比较。"
+        return "At least two options are needed for comparison."
     
-    # 按成本排序选项
-    sorted_options = sorted(options, key=lambda x: x["cost"])
+    # Calculate feature score for each option
+    for option in options:
+        option["feature_count"] = len(option.get("features", []))
+        
+        # Calculate value score (features per cost unit)
+        if option["cost"] > 0:
+            option["value_score"] = option["feature_count"] * 1000 / option["cost"]
+        else:
+            option["value_score"] = 0
     
-    # 计算最便宜和最贵选项之间的价差和百分比
-    cheapest = sorted_options[0]
-    most_expensive = sorted_options[-1]
-    price_diff = most_expensive["cost"] - cheapest["cost"]
-    price_diff_percent = (price_diff / cheapest["cost"]) * 100 if cheapest["cost"] > 0 else 0
+    # Sort options by different criteria
+    by_cost = sorted(options, key=lambda x: x["cost"])
+    by_features = sorted(options, key=lambda x: x["feature_count"], reverse=True)
+    by_value = sorted(options, key=lambda x: x["value_score"], reverse=True)
     
-    # 格式化输出
-    result = f"{option_type}选项比较:\n\n"
+    # Format output
+    result = f"Comparison of {option_type} Options:\n\n"
     
-    for i, option in enumerate(sorted_options, 1):
+    # List all options with details
+    result += "All Options:\n"
+    for i, option in enumerate(options, 1):
         result += f"{i}. {option['name']}\n"
-        result += f"   价格: ¥{option['cost']:,}\n"
-        
-        if "features" in option and option["features"]:
-            result += f"   特点: {', '.join(option['features'])}\n"
-        
-        if i > 1:
-            diff = option["cost"] - sorted_options[0]["cost"]
-            diff_percent = (diff / sorted_options[0]["cost"]) * 100 if sorted_options[0]["cost"] > 0 else 0
-            result += f"   比最便宜选项贵: ¥{diff:,} ({diff_percent:.1f}%)\n"
-        
-        result += "\n"
+        result += f"   Cost: ¥{option['cost']:,}\n"
+        result += f"   Features ({option['feature_count']}): {', '.join(option.get('features', []))}\n"
+        result += f"   Value Score: {option['value_score']:.2f}\n\n"
     
-    # 添加总体分析
-    result += "分析:\n"
-    result += f"- 价格范围: ¥{cheapest['cost']:,} 至 ¥{most_expensive['cost']:,}\n"
-    result += f"- 最高价与最低价差异: ¥{price_diff:,} ({price_diff_percent:.1f}%)\n"
+    # Best options by different criteria
+    result += "Best Options by Different Criteria:\n"
+    result += f"- Most Economical: {by_cost[0]['name']} (¥{by_cost[0]['cost']:,})\n"
+    result += f"- Most Features: {by_features[0]['name']} ({by_features[0]['feature_count']} features)\n"
+    result += f"- Best Value: {by_value[0]['name']} (Score: {by_value[0]['value_score']:.2f})\n\n"
     
-    # 添加针对性建议
-    result += "\n建议:\n"
+    # Comparison conclusion
+    result += "Analysis:\n"
     
-    if price_diff_percent < 20:
-        result += "- 各选项价格差异不大，建议选择性价比最高的选项\n"
-    elif price_diff_percent > 100:
-        result += "- 价格差异显著，请仔细评估更贵选项是否值得投入额外费用\n"
+    # Price range
+    price_min = by_cost[0]["cost"]
+    price_max = by_cost[-1]["cost"]
+    price_diff = price_max - price_min
+    
+    if price_min == price_max:
+        result += "- All options have the same price.\n"
     else:
-        result += "- 价格差异适中，请根据您的预算和需求选择合适选项\n"
+        result += f"- Price range: ¥{price_min:,} to ¥{price_max:,} (difference of ¥{price_diff:,}).\n"
+    
+    # Feature comparison
+    feature_min = min(opt["feature_count"] for opt in options)
+    feature_max = max(opt["feature_count"] for opt in options)
+    if feature_min == feature_max:
+        result += "- All options have the same number of features.\n"
+    else:
+        result += f"- Feature range: {feature_min} to {feature_max} features.\n"
+    
+    # Recommendation
+    result += "\nRecommendation:\n"
+    
+    if by_value[0]["value_score"] > 1.5 * by_value[-1]["value_score"]:
+        result += f"- The best value option is {by_value[0]['name']}, which offers significantly better value than others.\n"
+    elif by_cost[0]["cost"] < 0.7 * by_cost[-1]["cost"] and by_cost[0]["feature_count"] >= 0.8 * by_features[0]["feature_count"]:
+        result += f"- Consider the economical option {by_cost[0]['name']}, which offers good features at a lower price.\n"
+    elif by_features[0]["feature_count"] > 1.5 * by_features[-1]["feature_count"] and by_features[0]["cost"] <= 1.3 * by_cost[0]["cost"]:
+        result += f"- Consider the feature-rich option {by_features[0]['name']}, which offers many more features for a reasonable price increase.\n"
+    else:
+        result += f"- All options offer reasonable value. Choose based on your specific requirements and budget constraints.\n"
     
     return result
 
 def get_budget_summary(budget_id=None):
     """
-    获取预算摘要信息
+    Get budget summary information
     
-    参数:
-    - budget_id: 预算ID（可选，不提供则返回所有预算摘要）
+    Parameters:
+    - budget_id: Budget ID (optional), returns all budget summaries if not provided
     
-    返回:
-    - 预算摘要信息
+    Returns:
+    - Budget summary information
     """
-    # 如果没有预算记录
-    if not TRAVEL_BUDGETS:
-        return "尚未创建任何旅行预算。"
-    
-    # 如果指定了预算ID
+    # If budget_id is provided, return details for that specific budget
     if budget_id:
         if budget_id not in TRAVEL_BUDGETS:
-            return "无法找到该预算ID，请确认后重试。"
+            return "Budget ID not found."
         
-        budgets_to_show = {budget_id: TRAVEL_BUDGETS[budget_id]}
-    else:
-        budgets_to_show = TRAVEL_BUDGETS
-    
-    # 格式化输出
-    result = "旅行预算摘要:\n\n"
-    
-    for bid, budget in budgets_to_show.items():
-        result += f"预算ID: {bid}\n"
-        result += f"目的地: {budget['destination']}\n"
-        result += f"天数/人数: {budget['days']}天/{budget['traveler_count']}人\n"
-        result += f"旅行风格: {budget['travel_style']}\n"
-        result += f"总预算: ¥{budget['total_budget']:,}\n"
+        budget = TRAVEL_BUDGETS[budget_id]
         
-        # 如果有支出记录，计算已用和剩余预算
-        if bid in EXPENSES and EXPENSES[bid]:
-            total_spent = sum(e["amount"] for e in EXPENSES[bid])
-            total_remaining = budget["total_budget"] - total_spent
-            percent_used = (total_spent / budget["total_budget"]) * 100
+        # Calculate spent amounts
+        total_spent = 0
+        category_spent = {}
+        
+        if budget_id in EXPENSES:
+            total_spent = sum(e["amount"] for e in EXPENSES[budget_id])
             
-            result += f"已花费: ¥{total_spent:,} ({percent_used:.1f}%)\n"
-            result += f"剩余预算: ¥{total_remaining:,}\n"
-        else:
-            result += "尚未记录任何支出\n"
+            for category in budget["budget_items"].keys():
+                category_spent[category] = sum(e["amount"] for e in EXPENSES[budget_id] if e["category"] == category)
         
-        result += f"创建时间: {budget['created_time']}\n\n"
-    
-    return result 
+        # Calculate remaining budget
+        remaining = budget["total_budget"] - total_spent
+        
+        # Format output
+        result = f"Budget Summary (ID: {budget_id}):\n\n"
+        result += f"Destination: {budget['destination']}\n"
+        result += f"Travel Duration: {budget['days']} days\n"
+        result += f"Number of Travelers: {budget['traveler_count']}\n"
+        result += f"Travel Style: {budget['travel_style']}\n"
+        result += f"Created: {budget['created_time']}\n\n"
+        
+        result += f"Total Budget: ¥{budget['total_budget']:,}\n"
+        result += f"Total Spent: ¥{total_spent:,}\n"
+        result += f"Remaining: ¥{remaining:,}\n\n"
+        
+        if total_spent > 0:
+            percent_used = (total_spent / budget["total_budget"]) * 100
+            result += f"Budget Usage: {percent_used:.1f}% used\n\n"
+            
+            result += "Category Breakdown:\n"
+            for category, budget_amount in budget["budget_items"].items():
+                spent = category_spent.get(category, 0)
+                remaining_category = budget_amount - spent
+                
+                if budget_amount > 0:
+                    percent = (spent / budget_amount) * 100
+                    result += f"- {category}: ¥{spent:,} of ¥{budget_amount:,} ({percent:.1f}% used, ¥{remaining_category:,} remaining)\n"
+                else:
+                    result += f"- {category}: ¥{spent:,} of ¥{budget_amount:,}\n"
+        
+        return result
+        
+    # If no budget_id provided, return summary of all budgets
+    else:
+        if not TRAVEL_BUDGETS:
+            return "No budgets found."
+        
+        result = "All Budget Summaries:\n\n"
+        
+        for bid, budget in TRAVEL_BUDGETS.items():
+            # Calculate total spent
+            total_spent = 0
+            if bid in EXPENSES:
+                total_spent = sum(e["amount"] for e in EXPENSES[bid])
+            
+            # Calculate remaining budget
+            remaining = budget["total_budget"] - total_spent
+            
+            # Calculate percentage used
+            if budget["total_budget"] > 0:
+                percent_used = (total_spent / budget["total_budget"]) * 100
+            else:
+                percent_used = 0
+            
+            # Add to result
+            result += f"{bid}: {budget['destination']} ({budget['days']} days, {budget['traveler_count']} travelers)\n"
+            result += f"  Total: ¥{budget['total_budget']:,}, Spent: ¥{total_spent:,}, Remaining: ¥{remaining:,} ({percent_used:.1f}% used)\n"
+            result += f"  Created: {budget['created_time']}\n\n"
+        
+        return result 
