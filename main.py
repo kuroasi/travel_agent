@@ -53,10 +53,10 @@ async def main():
         "每个工作人员将执行任务并回复他们的结果和状态。"
         "整合工作人员的结果来完成任务。"
         "以下是各个工作人员的名称和介绍："
-        "travel_schedule_agent: You are a travel schedule agent. You can help users to make a travel plan."
-        "flight_agent: You are a flight agent. You can help users to search flight information and book flight tickets."
-        "hotel_agent: You are a hotel agent. You can help users to search hotel information and book hotel rooms."
-        "budget_agent: You are a budget agent. You can help users to manage their travel budget."
+        "travel_schedule_agent: help users to make a travel plan"
+        "flight_agent: help users to search flight information and book flight tickets."
+        "hotel_agent: help users to search hotel information and book hotel rooms."
+        "budget_agent: help users to manage their travel budget."
     )
     
     supervisor = create_supervisor(
