@@ -15,6 +15,7 @@ from agents.budget_agent import create_budget_agent
 
 import pprint
 
+
 # Load environment variables
 load_dotenv()
 
@@ -120,7 +121,10 @@ async def main():
         async for stream_mode, chunk in multi_agent_graph.astream(
             input_data,
             config,
-            stream_mode=["updates","custom"]
+            stream_mode=[
+                "updates",
+                "custom"
+                ]
             ):
             if stream_mode == "updates":
                 print("\n===== Execution Steps =====")
@@ -152,3 +156,5 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\n\nProgram interrupted by user. Thank you for using Travel Assistant, goodbye! 👋")
+
+
