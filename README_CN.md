@@ -45,7 +45,7 @@
 ## 项目结构
 
 ```
-travel_agentv2/
+travel_agent/
 │
 ├── main_swarm.py         # 主入口点（基于swarm的实现）
 ├── transfer_tool.py      # 智能体间信息传输工具
@@ -70,7 +70,7 @@ travel_agentv2/
 
 1. 克隆仓库：
    ```bash
-   git clone https://github.com/yourusername/travel_agentv2.git
+   git clone https://github.com/yourusername/travel_agent.git
    cd travel_agentv2
    ```
 

@@ -45,7 +45,7 @@ These agents communicate and collaborate using the LangGraph Swarm framework, en
 ## Project Structure
 
 ```
-travel_agentv2/
+travel_agent/
 │
 ├── main_swarm.py         # Main entry point (swarm-based implementation)
 ├── transfer_tool.py      # Tool for transferring information between agents
@@ -70,7 +70,7 @@ travel_agentv2/
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/travel_agentv2.git
+   git clone https://github.com/yourusername/travel_agent.git
    cd travel_agentv2
    ```
 
