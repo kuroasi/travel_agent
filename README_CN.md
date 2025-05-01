@@ -47,21 +47,23 @@
 ```
 travel_agent/
 │
-├── main_swarm.py         # 主入口点（基于swarm的实现）
-├── transfer_tool.py      # 智能体间信息传输工具
+├── main_groupchat.py     # 主入口点（群聊实现）
 │
-├── Agents:
+├── agents/               # 智能体定义
+│   ├── travel_schedule_agent.py # 旅行规划协调器，集成地图服务
 │   ├── flight_agent.py   # 航班搜索和预订智能体
 │   ├── hotel_agent.py    # 酒店搜索和预订智能体
-│   ├── budget_agent.py   # 预算管理智能体
-│   └── travel_schedule_agent.py # 旅行规划协调器，集成搜索和地图服务
+│   └── budget_agent.py   # 预算管理智能体
 │
-├── Tools and Data:
+├── tools/                # 工具实现
+│   ├── transfer_tool.py  # 智能体间转换工具
 │   ├── flight_tools.py   # 航班相关工具
-│   ├── flight_data.py    # 航班数据库
 │   ├── hotel_tools.py    # 酒店相关工具
-│   ├── hotel_data.py     # 酒店数据库
 │   └── budget_tools.py   # 预算管理工具
+│
+├── data/                 # 数据文件
+│   ├── flight_data.py    # 航班数据库
+│   └── hotel_data.py     # 酒店数据库
 │
 └── requirements.txt      # Python依赖
 ```
@@ -98,7 +100,7 @@ travel_agent/
 运行主应用程序：
 
 ```bash
-python main_swarm.py
+python main_groupchat.py
 ```
 
 系统将启动一个交互式会话，您可以用自然语言输入旅行查询。查询示例包括：

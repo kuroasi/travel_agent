@@ -1,3 +1,4 @@
+#this is a supervisor architecture for the travel agent
 import os
 import asyncio
 import uuid
@@ -66,7 +67,7 @@ async def main():
         prompt=system_prompt,
     )
 
-    # 编译图 - 使用checkpointer和store进行内存管理
+    # Compile graph - Using checkpointer and store for memory management
     multi_agent_graph = supervisor.compile(
         checkpointer=checkpointer,
         store=store
@@ -92,7 +93,7 @@ async def main():
         user_input = input("🧑‍💻 You: ")
 
         # Check if exit
-        if user_input.lower() in ['exit', 'quit', '退出', '结束']:
+        if user_input.lower() in ['exit', 'quit', 'exit', 'end']:
             print("\nThank you for using Travel Assistant, goodbye! 👋")
             break
 

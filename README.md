@@ -47,21 +47,23 @@ These agents communicate and collaborate using the LangGraph Swarm framework, en
 ```
 travel_agent/
 │
-├── main_swarm.py         # Main entry point (swarm-based implementation)
-├── transfer_tool.py      # Tool for transferring information between agents
+├── main_groupchat.py     # Main entry point with group chat implementation
 │
-├── Agents:
+├── agents/               # Agent definitions
+│   ├── travel_schedule_agent.py # Travel planning coordinator with map services
 │   ├── flight_agent.py   # Flight search and booking agent
 │   ├── hotel_agent.py    # Hotel search and booking agent
-│   ├── budget_agent.py   # Budget management agent
-│   └── travel_schedule_agent.py # Travel planning coordinator with search and map services
+│   └── budget_agent.py   # Budget management agent
 │
-├── Tools and Data:
+├── tools/                # Tool implementations
+│   ├── transfer_tool.py  # Tool for transferring between agents
 │   ├── flight_tools.py   # Flight-related utilities
-│   ├── flight_data.py    # Flight database
 │   ├── hotel_tools.py    # Hotel-related utilities
-│   ├── hotel_data.py     # Hotel database
 │   └── budget_tools.py   # Budget management utilities
+│
+├── data/                 # Data files
+│   ├── flight_data.py    # Flight database
+│   └── hotel_data.py     # Hotel database
 │
 └── requirements.txt      # Python dependencies
 ```
@@ -98,7 +100,7 @@ travel_agent/
 Run the main application:
 
 ```bash
-python main_swarm.py
+python main_groupchat.py
 ```
 
 The system will start an interactive session where you can input your travel queries in natural language. Examples of queries include:
