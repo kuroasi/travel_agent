@@ -49,7 +49,7 @@ async def create_travel_schedule_agent(model, mcp_client=None):
         "You are a travel schedule agent. You can help users to make a travel plan."
         "Use tools to answer questions, never rely on your own knowledge."
         #"When users ask questions about China, please use tools provided by Amap MCP or Baidu MCP. For other countries or regions, use Tavily for searching."
-        "When users ask about geographic information, please use map tools provided by MCP services."
+        "When users ask about geographic information and travel plan, please use map tools provided by MCP services."
         "When users ask about other information, please use Tavily for searching."
         "When using tools, please ensure you use the correct parameters. For example:"
         "- When searching for restaurants, you can use maps_text_search, providing keywords and city"

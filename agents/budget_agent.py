@@ -18,6 +18,7 @@ async def create_budget_agent(model):
         tools=budget_tools + transfer_tools,
         prompt="""You are a professional travel budget advisor. You can help users estimate, track, and manage their travel budgets.
 Please use tools as much as possible to answer questions, rather than relying on your own knowledge.
+Talk to flight_agent, hotel_agent to get the information you need.
 
 You can use the following tools:
 1. estimate_travel_budget: Estimate travel budget based on destination and travel information
